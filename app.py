@@ -1,25 +1,45 @@
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-import matplotlib.pyplot as plt
-import seaborn as sns
-import warnings
-warnings.filterwarnings('ignore')
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.impute import SimpleImputer
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+import pandas as pd
+import numpy as np
 
-df = pd.read_csv('ecommerce_sales_analytics_5000.csv')
+# Load the training data
+data = pd.read_csv('lab1.csv')
+concepts = np.array(data.iloc[:, :-1])
+target = np.array(data.iloc[:, -1])
 
-df.head()
+def candidate_elimination(concepts, target):
+    s = concepts[0].copy()
+    g = [["?" for _ in range(len(s))] for _ in range(len(s))]
 
-df.tail()
+    print("Initialization of specific h and general h")
+    print(s)
+    print(g)
 
-df.shape
+    for i, h in enumerate(concepts):
+        if target[i].lower() == "yes":
+            for j in range(len(s)):
+                if s[j] != h[j]:
+                    s[j] = '?'
+                    g[j][j] = '?'
+        else:
+            for j in range(len(s)):
+                if s[j] != h[j]:
+                    g[j][j] = s[j]
+                else:
+                    g[j][j] = '?'
 
-df.columns
+        print(f"\nSteps of Candidate Elimination Algorithm {i+1}")
+        print(s)
+        print(g)
 
-df.dtypes
+    # Remove overly general hypotheses
+    g = [gh for gh in g if gh != ["?"] * len(s)]
+
+    print("\nFinal Specific h:")
+    print(s)
+    print("\nFinal General h:")
+    print(g)
+
+    return s, g
+
+s_final, g_final = candidate_elimination(concepts, target)
+
